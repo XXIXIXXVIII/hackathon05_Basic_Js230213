@@ -4,6 +4,7 @@ const port = 4000
 const database = require('./sqlConect')
 const bodyParser = require('body-parser')
 var cors = require('cors')
+const checkInput = require('./middleWare/checkInput')
 
 app.use(cors())
 app.use(bodyParser.json());
@@ -20,23 +21,33 @@ app.get('/', (req, res) => {
       res.status(400).json(error)
       return error
     } else {
-      console.log('Kết quả truy vấn: ', results);
       res.status(200).send(results)
     }
   });
 
 })
 
-app.post('/', (req, res) => {
-
+app.post('/', checkInput,(req, res) => {
   let {nametodo} = req.body
   let NewTodoItem = [nametodo]
-
+  console.log(nametodo);
   database.query(`Insert into todoapp (nametodo) values (?)`,NewTodoItem, (error) => {
     if (error) {
       console.error('Lỗi truy vấn: ', error);
     } else {
       console.log('Kết quả truy vấn: ');
+    }
+  });
+  res.status(200).send("ok")
+})
+
+app.delete('/:todoid',(req,res)=>{
+  let {todoid} = req.params;
+  database.query(`DELETE FROM todoapp WHERE todoid = ${todoid}`, (error) => {
+    if (error) {
+      return console.error('Lỗi truy vấn: ', error);
+    } else {
+      return console.log('delete done ');
     }
   });
   res.status(200).send("ok")
